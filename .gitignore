@@ -1,0 +1,65 @@
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+*.rlib
+
+# C
+*.o
+*.ko
+*.obj
+*.mod
+*.mod.c
+*.symvers
+*.order
+*.cmd
+.tmp_versions/
+core-loader/core3_loader
+core-loader/core3_loader_v2
+
+# Embedded Build Artifacts
+*.bin
+*.elf
+*.hex
+*.img
+*.map
+*.lst
+*.a
+*.d
+*.su
+
+# Linker outputs
+*.out
+
+# Debug files
+*.dSYM/
+*.dwarf
+
+# Editor
+.vscode/
+.idea/
+*~
+*.swp
+*.swo
+.*.swp
+.*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build directories
+build/
+dist/
+out/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# Tags and databases
+tags
+TAGS
+*.db
+*.sqlite

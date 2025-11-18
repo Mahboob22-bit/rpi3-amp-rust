@@ -1,0 +1,14 @@
+# Rust build artifacts
+target/
+Cargo.lock
+
+# Binary outputs
+*.bin
+*.elf
+*.img
+*.hex
+*.map
+
+# Debug information
+*.dSYM/
+*.dwarf
