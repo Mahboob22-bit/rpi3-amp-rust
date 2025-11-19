@@ -17,4 +17,4 @@ ls -lh target/aarch64-unknown-none/release/kernel_core3.img
 echo ""
 echo "=== Ready to deploy ==="
 echo "To copy to Raspberry Pi, run:"
-echo "  scp target/aarch64-unknown-none/release/kernel_core3.img admin@rpi3-amp:~/rpi3-amp-project/rpi3-amp-rust/raspberry-pi/core-loader/"
+echo "  scp target/aarch64-unknown-none/release/kernel_core3.img admin@rpi3-amp:~/dev/rpi3-amp-rust/raspberry-pi/core-loader/"

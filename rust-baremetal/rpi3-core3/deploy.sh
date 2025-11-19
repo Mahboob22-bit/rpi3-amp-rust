@@ -2,7 +2,7 @@
 set -e
 
 RPI_HOST="${RPI_HOST:-admin@rpi3-amp}"
-RPI_PATH="~/rpi3-amp-project/rpi3-amp-rust/raspberry-pi/core-loader/"
+RPI_PATH="~/dev/rpi3-amp-rust/raspberry-pi/core-loader/"
 
 echo "=== Deploying to Raspberry Pi ==="
 echo "Target: $RPI_HOST:$RPI_PATH"

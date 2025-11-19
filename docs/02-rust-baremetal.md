@@ -138,7 +138,7 @@ Diese `.img` Datei wird auf den Raspberry Pi übertragen.
 ## Auf den Pi übertragen
 ```bash
 scp target/aarch64-unknown-none/release/kernel_core3.img \
-    admin@rpi3-amp:~/rpi3-amp-project/
+    admin@rpi3-amp:~/dev/rpi3-amp-rust/raspberry-pi/core-loader/
 ```
 
 ## Build & Deploy Scripts
@@ -185,7 +185,7 @@ RPI_HOST=pi@192.168.1.100 ./deploy.sh
 
 # 3. Auf dem Pi ausführen (via SSH)
 ssh admin@rpi3-amp
-cd ~/rpi3-amp-project/rpi3-amp-rust/raspberry-pi/core-loader
+cd ~/dev/rpi3-amp-rust/raspberry-pi/core-loader
 sudo ./core3_loader_v2 kernel_core3.img
 ```
 

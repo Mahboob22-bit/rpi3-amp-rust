@@ -11,7 +11,7 @@ Der **Core Loader** ist ein User-Space Programm, das:
 
 Auf dem **Raspberry Pi**:
 ```bash
-cd ~/rpi3-amp-project/raspberry-pi/core-loader
+cd ~/dev/rpi3-amp-rust/raspberry-pi/core-loader
 make
 ```
 
@@ -84,7 +84,7 @@ __sync_synchronize();
 
 ## Ausführen
 ```bash
-cd ~/rpi3-amp-project
+cd ~/dev/rpi3-amp-rust
 
 # Als root ausführen (braucht /dev/mem Zugriff)
 sudo raspberry-pi/core-loader/core3_loader_v2 kernel_core3.img

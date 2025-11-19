@@ -18,7 +18,8 @@ raspberry-pi/
 
 ### 1. Repository klonen
 ```bash
-cd ~
+mkdir -p ~/dev
+cd ~/dev
 git clone https://github.com/Mahboob22-bit/rpi3-amp-rust.git
 cd rpi3-amp-rust
 ```
@@ -49,12 +50,12 @@ Von deinem Entwicklungs-PC (WSL):
 ```bash
 # Im rust-baremetal/rpi3-core3 Verzeichnis
 scp target/aarch64-unknown-none/release/kernel_core3.img \
-    admin@rpi3-amp:~/rpi3-amp-rust/raspberry-pi/core-loader/
+    admin@rpi3-amp:~/dev/rpi3-amp-rust/raspberry-pi/core-loader/
 ```
 
 ### 5. Core 3 starten
 ```bash
-cd ~/rpi3-amp-rust/raspberry-pi/core-loader
+cd ~/dev/rpi3-amp-rust/raspberry-pi/core-loader
 sudo ./core3_loader_v2 kernel_core3.img
 ```
 
