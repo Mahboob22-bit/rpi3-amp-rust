@@ -63,3 +63,8 @@ tags
 TAGS
 *.db
 *.sqlite
+
+# Raspberry Pi specific
+raspberry-pi/core-loader/core3_loader_v2
+raspberry-pi/core-loader/kernel_core3.img
+*.img

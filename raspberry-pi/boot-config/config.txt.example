@@ -1,0 +1,13 @@
+# Wichtige Einstellungen für AMP Setup
+# Diese Zeilen zu /boot/firmware/config.txt hinzufügen
+
+[all]
+# UART für Debugging aktivieren
+enable_uart=1
+
+# Optional: Weitere nützliche Einstellungen
+# GPU Memory reduzieren (mehr RAM für Apps)
+gpu_mem=16
+
+# Performance-Modus
+arm_boost=1
