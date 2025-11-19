@@ -141,6 +141,55 @@ scp target/aarch64-unknown-none/release/kernel_core3.img \
     admin@rpi3-amp:~/rpi3-amp-project/
 ```
 
+## Build & Deploy Scripts
+
+Für einfacheres Arbeiten gibt es zwei Helper-Scripts:
+
+### build.sh
+[Siehe Script](../rust-baremetal/rpi3-core3/build.sh)
+
+Kompiliert das Projekt und konvertiert die Binary:
+```bash
+cd rust-baremetal/rpi3-core3
+./build.sh
+```
+
+Das Script:
+1. Führt `cargo build --release` aus
+2. Konvertiert ELF zu Raw-Binary mit `rust-objcopy`
+3. Zeigt die Binary-Größe an
+
+### deploy.sh
+[Siehe Script](../rust-baremetal/rpi3-core3/deploy.sh)
+
+Überträgt die Binary zum Raspberry Pi:
+```bash
+./deploy.sh
+```
+
+**Umgebungsvariablen:**
+- `RPI_HOST`: SSH-Ziel (default: `admin@rpi3-amp`)
+
+Beispiel mit anderem Host:
+```bash
+RPI_HOST=pi@192.168.1.100 ./deploy.sh
+```
+
+### Kompletter Workflow
+```bash
+# 1. Bauen
+./build.sh
+
+# 2. Deployen
+./deploy.sh
+
+# 3. Auf dem Pi ausführen (via SSH)
+ssh admin@rpi3-amp
+cd ~/rpi3-amp-project/rpi3-amp-rust/raspberry-pi/core-loader
+sudo ./core3_loader_v2 kernel_core3.img
+```
+
+
 ## Nächster Schritt
 
 ➡️ [03-linux-kernel.md](03-linux-kernel.md) - Linux auf 3 Cores limitieren
