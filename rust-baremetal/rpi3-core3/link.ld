@@ -2,8 +2,8 @@ ENTRY(_start)
 
 SECTIONS
 {
-    /* Core 3 startet bei 0x3B000000 (high memory before GPU/Peripherals) */
-    . = 0x3B000000;
+    /* Core 3 startet bei 0x38000000 (896MB - beyond Linux, within ARM RAM with gpu_mem=16) */
+    . = 0x38000000;
     
     .text : {
         KEEP(*(.text.boot))

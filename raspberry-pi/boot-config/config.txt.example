@@ -5,9 +5,14 @@
 # UART für Debugging aktivieren
 enable_uart=1
 
-# Optional: Weitere nützliche Einstellungen
-# GPU Memory reduzieren (mehr RAM für Apps)
+# GPU Memory auf Minimum reduzieren für mehr ARM RAM
+# Standard: 76M, Minimum: 16M
+# Mit gpu_mem=16 hat ARM ca. 1008MB verfügbar
 gpu_mem=16
+
+# Optional: Total memory für Linux begrenzen (Alternative zu mem= in cmdline.txt)
+# Uncomment next line to limit Linux to 768MB
+# total_mem=768
 
 # Performance-Modus
 arm_boost=1
