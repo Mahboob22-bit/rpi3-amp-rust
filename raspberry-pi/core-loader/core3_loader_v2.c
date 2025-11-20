@@ -7,16 +7,15 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-// Memory Layout für RPi3 mit 1GB RAM:
+// Memory Layout für RPi3 mit 1GB RAM (NO mem= parameter):
 // 0x00000000 - 0x00000FFF : Spin tables (ARM stub)
-// 0x00001000 - 0x2DFFFFFF : Linux RAM (~730MB used typically)
-// 0x2E000000 - 0x3AFFFFFF : Potentially available (~208MB)
-// 0x3B000000 - 0x3EFFFFFF : GPU memory (76MB default, 16MB with gpu_mem=16)
+// 0x00001000 - 0x3D5FFFFF : System RAM visible to Linux (~998MB with gpu_mem=16)
+// 0x3D600000 - 0x3EFFFFFF : GPU memory (16MB with gpu_mem=16)
 // 0x3F000000 - 0x3FFFFFFF : Peripherals
 //
-// Strategy: Use 0x38000000 (896MB) - safe middle ground
-// With gpu_mem=16: ARM gets ~1008MB, so 0x38000000 is well within ARM RAM
-// Current Linux uses ~731MB, so this address is beyond Linux usage
+// Strategy: Use high address within System RAM but beyond Linux usage
+// Linux uses ~731MB, so anything above ~0x2E000000 is relatively safe
+// We use 0x38000000 (896MB) - high enough to avoid Linux, low enough to be in RAM map
 
 // ARM64 Spin Table Addresses (from armstub8.S)
 #define SPIN_TABLE_BASE      0x000000D8
@@ -25,7 +24,8 @@
 #define CORE2_SPIN_ADDR      (SPIN_TABLE_BASE + 0x10)  // 0xE8
 #define CORE3_SPIN_ADDR      (SPIN_TABLE_BASE + 0x18)  // 0xF0
 
-// Startadresse für Core 3 - 896MB (safe with gpu_mem=16)
+// Startadresse für Core 3 - 896MB (within System RAM map)
+// WARNING: Might conflict with Linux if it allocates high memory!
 #define CORE3_ENTRY          0x38000000
 
 int main(int argc, char** argv) {
