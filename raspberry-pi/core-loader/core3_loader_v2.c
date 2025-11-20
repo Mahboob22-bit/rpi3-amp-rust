@@ -7,13 +7,21 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-// BCM2837 Local Peripherals (ARM-side)
-#define ARM_LOCAL_BASE       0x40000000
-#define CORE3_MAILBOX3_SET   (ARM_LOCAL_BASE + 0x8C)
-#define CORE3_MAILBOX3_CLR   (ARM_LOCAL_BASE + 0xCC)
+// Memory Layout für RPi3 mit 1GB RAM und mem=768M:
+// 0x00000000 - 0x00000FFF : Spin tables (ARM stub)
+// 0x00001000 - 0x2FFFFFFF : Linux RAM (768MB)
+// 0x30000000 - 0x3EFFFFFF : Free for Core 3 bare-metal (240MB)
+// 0x3F000000 - 0x3FFFFFFF : Peripherals
 
-// Startadresse für Core 3
-#define CORE3_ENTRY          0x00080000
+// ARM64 Spin Table Addresses (from armstub8.S)
+#define SPIN_TABLE_BASE      0x000000D8
+#define CORE0_SPIN_ADDR      (SPIN_TABLE_BASE + 0x00)  // 0xD8
+#define CORE1_SPIN_ADDR      (SPIN_TABLE_BASE + 0x08)  // 0xE0
+#define CORE2_SPIN_ADDR      (SPIN_TABLE_BASE + 0x10)  // 0xE8
+#define CORE3_SPIN_ADDR      (SPIN_TABLE_BASE + 0x18)  // 0xF0
+
+// Startadresse für Core 3 (768MB - start of free region)
+#define CORE3_ENTRY          0x30000000
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -100,36 +108,48 @@ int main(int argc, char** argv) {
     }
     
     munmap(target_mem, 4096);
-    
-    // 4. Mailbox für Core 3 wakeup
-    printf("Mapping ARM local peripherals at 0x%x...\n", ARM_LOCAL_BASE);
-    void* mailbox_page = mmap(NULL, 4096,
-                             PROT_READ | PROT_WRITE,
-                             MAP_SHARED,
-                             mem_fd,
-                             ARM_LOCAL_BASE);
-    
-    if (mailbox_page == MAP_FAILED) {
-        perror("mmap failed for mailbox");
+
+    // 4. Spin-Table für Core 3 wakeup (ARM64 Standard-Methode)
+    printf("Mapping spin table at 0x%lx...\n", CORE3_SPIN_ADDR);
+    void* spin_page = mmap(NULL, 4096,
+                          PROT_READ | PROT_WRITE,
+                          MAP_SHARED,
+                          mem_fd,
+                          0x0);  // Map page 0 (contains spin tables)
+
+    if (spin_page == MAP_FAILED) {
+        perror("mmap failed for spin table");
         close(mem_fd);
         free(kernel_data);
         return 1;
     }
-    
-    volatile uint32_t* mailbox3 = (volatile uint32_t*)((uint8_t*)mailbox_page + 0x8C);
-    
-    printf("Sending wakeup to Core 3 with entry point 0x%x...\n", CORE3_ENTRY);
-    
-    // Startadresse in Mailbox schreiben
-    *mailbox3 = CORE3_ENTRY;
+
+    // Core 3 spin table entry (64-bit entry point address)
+    volatile uint64_t* core3_spin = (volatile uint64_t*)((uint8_t*)spin_page + CORE3_SPIN_ADDR);
+
+    printf("Current spin table value at 0x%lx: 0x%lx\n", CORE3_SPIN_ADDR, *core3_spin);
+    printf("Writing entry point 0x%x to Core 3 spin table...\n", CORE3_ENTRY);
+
+    // Wichtig: Data cache flush BEVOR wir die spin table schreiben
     __sync_synchronize();
-    
-    printf("\n=== Core 3 wakeup signal sent! ===\n");
+
+    // Startadresse in Spin-Table schreiben (64-bit!)
+    *core3_spin = (uint64_t)CORE3_ENTRY;
+
+    // Cache coherency sicherstellen
+    __sync_synchronize();
+    msync(spin_page, 4096, MS_SYNC);
+
+    // SEV (Send Event) würde hier Core 3 aus WFE wecken, aber das geht aus Userspace nicht
+    // Core 3 muss die spin table pollen (was armstub8 normalerweise macht)
+
+    printf("\n=== Core 3 wakeup signal sent via spin table! ===\n");
+    printf("Spin table entry at 0x%lx = 0x%lx\n", CORE3_SPIN_ADDR, *core3_spin);
     printf("Watch the ACT LED (GPIO 47) - it should blink!\n");
     printf("\nPress Ctrl+C to exit (Core 3 keeps running)\n");
-    
+
     // Cleanup
-    munmap(mailbox_page, 4096);
+    munmap(spin_page, 4096);
     close(mem_fd);
     free(kernel_data);
     
