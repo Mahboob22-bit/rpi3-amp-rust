@@ -7,11 +7,16 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-// Memory Layout für RPi3 mit 1GB RAM und mem=768M:
+// Memory Layout für RPi3 mit 1GB RAM:
 // 0x00000000 - 0x00000FFF : Spin tables (ARM stub)
-// 0x00001000 - 0x2FFFFFFF : Linux RAM (768MB)
-// 0x30000000 - 0x3EFFFFFF : Free for Core 3 bare-metal (240MB)
+// 0x00001000 - 0x0FFFFFFF : Linux Kernel & early boot (256MB)
+// 0x10000000 - 0x3AFFFFFF : Linux userspace RAM
+// 0x3B000000 - 0x3EFFFFFF : POTENTIAL free area (GPU steals from top)
 // 0x3F000000 - 0x3FFFFFFF : Peripherals
+//
+// Strategy: Use high address but under GPU memory
+// GPU typically uses 76MB from top = 0x3B400000 - 0x3EFFFFFF
+// We use 0x3B000000 as safe bet
 
 // ARM64 Spin Table Addresses (from armstub8.S)
 #define SPIN_TABLE_BASE      0x000000D8
@@ -20,8 +25,8 @@
 #define CORE2_SPIN_ADDR      (SPIN_TABLE_BASE + 0x10)  // 0xE8
 #define CORE3_SPIN_ADDR      (SPIN_TABLE_BASE + 0x18)  // 0xF0
 
-// Startadresse für Core 3 (768MB - start of free region)
-#define CORE3_ENTRY          0x30000000
+// Startadresse für Core 3 - HIGH but under GPU mem (check with /proc/iomem)
+#define CORE3_ENTRY          0x3B000000
 
 int main(int argc, char** argv) {
     if (argc != 2) {
