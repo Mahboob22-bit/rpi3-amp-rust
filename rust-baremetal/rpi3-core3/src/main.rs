@@ -1,9 +1,8 @@
 #![no_std]
 #![no_main]
-#![feature(naked_functions)]
 
 use core::panic::PanicInfo;
-use core::arch::asm;
+use core::arch::naked_asm;
 
 // GPIO Base Address für Raspberry Pi 3
 const GPIO_BASE: usize = 0x3F20_0000;
@@ -21,10 +20,10 @@ fn panic(_info: &PanicInfo) -> ! {
 
 // ARM64 Boot Stub - MUSS als erste Funktion kommen!
 #[no_mangle]
-#[naked]
+#[unsafe(naked)]
 #[link_section = ".text.boot"]
 pub unsafe extern "C" fn _start() -> ! {
-    asm!(
+    naked_asm!(
         // Disable interrupts
         "msr daifset, #0xF",
 
@@ -46,8 +45,7 @@ pub unsafe extern "C" fn _start() -> ! {
         "bl rust_main",
 
         // If main returns, loop forever
-        "3: b 3b",
-        options(noreturn)
+        "3: b 3b"
     )
 }
 
