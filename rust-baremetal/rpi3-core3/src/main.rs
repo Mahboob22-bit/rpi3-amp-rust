@@ -1,7 +1,9 @@
 #![no_std]
 #![no_main]
+#![feature(naked_functions)]
 
 use core::panic::PanicInfo;
+use core::arch::asm;
 
 // GPIO Base Address für Raspberry Pi 3
 const GPIO_BASE: usize = 0x3F20_0000;
@@ -17,9 +19,40 @@ fn panic(_info: &PanicInfo) -> ! {
     loop {}
 }
 
+// ARM64 Boot Stub - MUSS als erste Funktion kommen!
 #[no_mangle]
+#[naked]
 #[link_section = ".text.boot"]
-pub extern "C" fn _start() -> ! {
+pub unsafe extern "C" fn _start() -> ! {
+    asm!(
+        // Disable interrupts
+        "msr daifset, #0xF",
+
+        // Set stack pointer to end of our memory region + 64KB
+        "ldr x0, =0x38010000",
+        "mov sp, x0",
+
+        // Clear BSS section
+        "ldr x0, =__bss_start",
+        "ldr x1, =__bss_end",
+        "1:",
+        "cmp x0, x1",
+        "b.ge 2f",
+        "str xzr, [x0], #8",
+        "b 1b",
+        "2:",
+
+        // Branch to Rust main
+        "bl rust_main",
+
+        // If main returns, loop forever
+        "3: b 3b",
+        options(noreturn)
+    )
+}
+
+#[no_mangle]
+pub extern "C" fn rust_main() -> ! {
     // GPIO 47 als Output konfigurieren
     unsafe {
         // GPFSEL4 steuert GPIO 40-49
